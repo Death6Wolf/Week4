@@ -9,42 +9,58 @@
 #The outcomes are "heart attack", "heart failure", or "pneumonia"
 
 rankall <- function(outcome, num = "best") {
-        ## Read outcome data
+        
+                ## Read outcome data
+        
         stateoutcome <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
         
         ## Check that state and outcome are valid
-        outcome <- tolower(outcome)
         
+        outcome <- tolower(outcome)
         validoutcomes <- c('heart attack','heart failure','pneumonia')
 
         if (outcome %in% validoutcomes) {
                 
         } else stop(paste(c("Please provide one of the following valid outcomes",validoutcomes), sep = " ",collapse = ","))
         
-        
         ## For each state, find the hospital of the given rank
         
         case <- which(outcome==validoutcomes)
         x <- c(11,17,23)
-        stateoutcome[,x[case]] <- as.numeric(stateoutcome[,x[case]])
+        stateoutcome[,x[case]] <- suppressWarnings(as.numeric(stateoutcome[,x[case]]))
         stateoutcome <- stateoutcome[complete.cases(stateoutcome[x[case]]),c(2,7,x[case])]
         stateoutcome <- stateoutcome[order(stateoutcome[,3],stateoutcome[,1]),]
-        # Setup num
+        finalt <- data.frame()
+        splitted <- split(stateoutcome[,1:3],stateoutcome[,2])
         
         
-
+        
         if (num=="best") {
                 num <- 1
+                
+        }else if (num =="worst") {
+                num <- sapply(splitted,nrow)
+                for(i in 1:length(num)) {
+                        statedata <- as.data.frame(splitted[i])
+                        colnames(statedata) <- c("hospital","state")
+                        finalt <- rbind(finalt,statedata[num[i],1:2])
+                        
+                }
+                
+                return(finalt)
         }
+
+        #if not worst
         
-        
-        
-        splitoutcome <- sapply(split(stateoutcome[,1:3],stateoutcome[,2]),function(y){y[num,]})
-        
-        splitoutcome <- t(splitoutcome)
-        #names(t) <- c("hospital","state")
-        cbind.data.frame(splitoutcome)
+        for(i in 1:length(splitted)) {
+                statedata <- as.data.frame(splitted[i])
+                colnames(statedata) <- c("hospital","state")
+                finalt <- rbind(finalt,statedata[num,1:2])
+                
+        }
         
         ## Return a data frame with the hospital names and the
         ## (abbreviated) state name
+        finalt
+        
 }
