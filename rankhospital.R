@@ -23,6 +23,7 @@ rankhospital <- function(state, outcome, num = "best") {
         case <- which(outcome==validoutcomes)
         x <- c(11,17,23)
         stateoutcome[,x[case]] <- as.numeric(stateoutcome[,x[case]])
+        stateoutcome <- stateoutcome[complete.cases(stateoutcome[x[case]]),]
         rankedoutcome <- stateoutcome[order(stateoutcome[,x[case]],stateoutcome[,2]),]
         
         # Setup num
